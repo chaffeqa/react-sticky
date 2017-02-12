@@ -1,6 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+var eventListenerOptions;
+const getEventListenerOptions = () => {
+  // detect if browser supports passive event listening
+  // https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md
+  if (eventListenerOptions === undefined){
+    eventListenerOptions = false;
+    try {
+      var opts = Object.defineProperty({}, 'passive', {
+        get: function() {
+          eventListenerOptions = { passive: true };
+        }
+      });
+      window.addEventListener("test", null, opts);
+    } catch (e) {} 
+  }
+  return eventListenerOptions
+}
+
 export default class Sticky extends React.Component {
 
   static propTypes = {
@@ -117,7 +135,7 @@ export default class Sticky extends React.Component {
 
   on(events, callback) {
     events.forEach((evt) => {
-      window.addEventListener(evt, callback);
+      window.addEventListener(evt, callback, getEventListenerOptions());
     });
   }
 
